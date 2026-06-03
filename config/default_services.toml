@@ -1,0 +1,43 @@
+[global]
+download_dir = "~/Downloads"
+start_minimized = false
+
+[[services]]
+id = "messenger"
+name = "Messenger"
+url = "https://www.messenger.com"
+icon = "messenger"
+enabled = true
+notifications = true
+auto_grant_media = true
+allowed_origins = ["messenger.com", "facebook.com"]
+
+[[services]]
+id = "slack"
+name = "Slack"
+url = "https://app.slack.com"
+icon = "slack"
+enabled = true
+notifications = true
+auto_grant_media = true
+allowed_origins = ["slack.com"]
+
+[[services]]
+id = "protonmail"
+name = "Proton Mail"
+url = "https://mail.proton.me"
+icon = "protonmail"
+enabled = true
+notifications = true
+auto_grant_media = false
+allowed_origins = ["proton.me"]
+
+[[services]]
+id = "telegram"
+name = "Telegram"
+url = "https://web.telegram.org"
+icon = "telegram"
+enabled = true
+notifications = true
+auto_grant_media = true
+allowed_origins = ["telegram.org"]

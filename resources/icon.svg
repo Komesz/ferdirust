@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2d1b69"/>
+      <stop offset="100%" stop-color="#1a1145"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded square background -->
+  <rect width="256" height="256" rx="48" ry="48" fill="url(#bg)"/>
+  <!-- Back bubble (green) -->
+  <g transform="translate(148, 60)">
+    <path d="M0,0 C0,-2 2,-4 4,-4 L68,-4 C74,-4 78,0 78,6 L78,42 C78,48 74,52 68,52 L58,52 L62,64 L46,52 L4,52 C-2,52 -4,48 -4,42 L-4,6 C-4,0 0,-4 4,-4 Z"
+          fill="#4ade80" opacity="0.85"/>
+  </g>
+  <!-- Middle bubble (blue) -->
+  <g transform="translate(38, 85)">
+    <path d="M4,0 L82,0 C88,0 92,4 92,10 L92,54 C92,60 88,64 82,64 L36,64 L20,78 L24,64 L4,64 C-2,64 -4,60 -4,54 L-4,10 C-4,4 0,0 4,0 Z"
+          fill="#60a5fa" opacity="0.9"/>
+  </g>
+  <!-- Front bubble (orange) -->
+  <g transform="translate(100, 130)">
+    <path d="M4,0 L76,0 C82,0 86,4 86,10 L86,50 C86,56 82,60 76,60 L44,60 L30,74 L33,60 L4,60 C-2,60 -4,56 -4,50 L-4,10 C-4,4 0,0 4,0 Z"
+          fill="#fb923c" opacity="0.9"/>
+  </g>
+  <!-- Chat dots on blue bubble -->
+  <circle cx="54" cy="117" r="5" fill="white" opacity="0.9"/>
+  <circle cx="74" cy="117" r="5" fill="white" opacity="0.9"/>
+  <circle cx="94" cy="117" r="5" fill="white" opacity="0.9"/>
+  <!-- Chat lines on green bubble -->
+  <rect x="160" y="72" width="48" height="5" rx="2.5" fill="white" opacity="0.8"/>
+  <rect x="160" y="84" width="36" height="5" rx="2.5" fill="white" opacity="0.6"/>
+  <!-- Chat lines on orange bubble -->
+  <rect x="112" y="148" width="52" height="5" rx="2.5" fill="white" opacity="0.8"/>
+  <rect x="112" y="160" width="38" height="5" rx="2.5" fill="white" opacity="0.6"/>
+</svg>

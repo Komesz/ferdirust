@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  width: 56px;
+  min-width: 56px;
+  max-width: 56px;
+  height: 100vh;
+  background: #1a1a2e;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 8px;
+  user-select: none;
+}
+.service-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  background: #16213e;
+  color: #a0a0b0;
+  font-size: 18px;
+  font-weight: 600;
+  transition: background 0.15s, transform 0.1s;
+  overflow: hidden;
+}
+.service-icon img {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+}
+.service-icon .letter {
+  display: block;
+}
+.service-icon:hover {
+  background: #0f3460;
+  transform: scale(1.05);
+}
+.service-icon.active {
+  background: #533483;
+  color: #fff;
+}
+.service-icon.active::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 20px;
+  background: #e94560;
+  border-radius: 0 2px 2px 0;
+}
+.badge-dot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  background: #e94560;
+  border-radius: 50%;
+  display: none;
+}
+.badge-dot.visible { display: block; }
+.service-icon.active .badge-dot { display: none; }
+.separator {
+  width: 28px;
+  height: 1px;
+  background: #333;
+  margin: 4px 0 8px;
+}
+</style>
+</head>
+<body>
+<div id="services"></div>
+<div class="separator"></div>
+<script>
+let services = [];
+let activeId = null;
+
+function initServices(serviceList) {
+  services = serviceList;
+  const container = document.getElementById('services');
+  container.innerHTML = '';
+  serviceList.forEach((svc, i) => {
+    const div = document.createElement('div');
+    div.className = 'service-icon' + (i === 0 ? ' active' : '');
+    div.id = 'svc-' + svc.id;
+    div.title = svc.name;
+    div.onclick = () => switchService(svc.id);
+
+    // Try loading favicon, fall back to letter
+    const letter = document.createElement('span');
+    letter.className = 'letter';
+    letter.textContent = svc.name.charAt(0).toUpperCase();
+    div.appendChild(letter);
+
+    if (svc.url) {
+      try {
+        const origin = new URL(svc.url).origin;
+        const img = document.createElement('img');
+        img.src = 'https://www.google.com/s2/favicons?domain=' + new URL(svc.url).hostname + '&sz=64';
+        img.onload = () => { letter.style.display = 'none'; div.insertBefore(img, letter); };
+        img.onerror = () => {}; // keep letter
+      } catch(e) {}
+    }
+
+    const dot = document.createElement('span');
+    dot.className = 'badge-dot';
+    dot.id = 'dot-' + svc.id;
+    div.appendChild(dot);
+
+    container.appendChild(div);
+  });
+  if (serviceList.length > 0) activeId = serviceList[0].id;
+}
+
+function setActiveService(id) {
+  if (activeId) {
+    const prev = document.getElementById('svc-' + activeId);
+    if (prev) prev.classList.remove('active');
+  }
+  const next = document.getElementById('svc-' + id);
+  if (next) next.classList.add('active');
+  activeId = id;
+}
+
+function switchService(id) {
+  // Post message to native code via window.cefQuery or title change
+  document.title = 'ferdirust:switch:' + id;
+  setActiveService(id);
+}
+
+function updateFavicon(id, url) {
+  const div = document.getElementById('svc-' + id);
+  if (!div) return;
+  const img = document.createElement('img');
+  img.src = url;
+  img.onload = () => {
+    div.querySelectorAll('img').forEach(el => el.remove());
+    const letter = div.querySelector('.letter');
+    if (letter) letter.style.display = 'none';
+    div.insertBefore(img, div.firstChild);
+  };
+}
+
+function updateBadges(badges) {
+  for (const [id, unread] of Object.entries(badges)) {
+    const dot = document.getElementById('dot-' + id);
+    if (dot) {
+      if (unread) {
+        dot.classList.add('visible');
+      } else {
+        dot.classList.remove('visible');
+      }
+    }
+  }
+}
+</script>
+</body>
+</html>
