@@ -38,14 +38,20 @@
       dontConfigure = true;
       dontBuild = true;
       dontStrip = true;
+      # cef-dll-sys 145.6.1 expects FLAT layout: archive.json at top level
+      # plus all CEF files at top level. (The versioned-subdir layout is
+      # only in cef-rs main branch / future releases.)
       installPhase = ''
         runHook preInstall
-        mkdir -p $out/${cefVersion}/linux64
-        # Tarball top-level is a single dir named cefArchiveName/ — strip it.
-        cp -r ${cefArchiveName}/* $out/${cefVersion}/linux64/ 2>/dev/null || \
-          cp -r ./* $out/${cefVersion}/linux64/
-        # Write archive.json sentinel that cef-dll-sys's check_archive_json validates.
-        cat > $out/${cefVersion}/linux64/archive.json <<EOF
+        mkdir -p $out
+        # Tarball extracts to a single dir named cefArchiveName/ — flatten it.
+        if [ -d ${cefArchiveName} ]; then
+          cp -r ${cefArchiveName}/. $out/
+        else
+          cp -r . $out/
+        fi
+        # Sentinel file cef-dll-sys's check_archive_json validates.
+        cat > $out/archive.json <<EOF
         {
           "type": "minimal",
           "name": "${cefArchiveName}",
@@ -95,9 +101,8 @@
         mv $out/bin/ferdirust $out/lib/ferdirust/ferdirust
 
         # CEF runtime files: copy from the pre-fetched cefBinary layout
-        # (${cefBinary}/${cefVersion}/linux64/). Release/Resources subdirs
-        # contain the libs + .pak files in standard CEF distributions.
-        cefDir=${cefBinary}/${cefVersion}/linux64
+        # (${cefBinary}/ is flat — see cefBinary derivation above).
+        cefDir=${cefBinary}
         cp -r $cefDir/Release/. $out/lib/ferdirust/ 2>/dev/null || true
         cp -r $cefDir/Resources/. $out/lib/ferdirust/ 2>/dev/null || true
         # Fall back: copy flattened top-level files for distributions that
