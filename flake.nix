@@ -96,8 +96,12 @@
 
       # Pre-fetched CEF — cef-dll-sys (https://github.com/tauri-apps/cef-rs)
       # reads CEF_PATH and skips its network download when the expected
-      # versioned dir + archive.json sentinel are present (see cefBinary above).
+      # archive.json sentinel is at the top level (see cefBinary above).
       CEF_PATH = "${cefBinary}";
+
+      # libcef.so transitively references glib/gio/gobject symbols. cef-dll-sys
+      # only emits `-lcef`, so we add the rest via NIX_LDFLAGS.
+      NIX_LDFLAGS = "-lglib-2.0 -lgio-2.0 -lgobject-2.0";
 
       # The build.rs sets rustc-link-arg=-Wl,-rpath,$ORIGIN so the binary
       # looks for libcef.so next to itself. We lay everything out under
