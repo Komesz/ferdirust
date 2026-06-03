@@ -15,7 +15,7 @@
     #   3. update url + hash here
     cefSrc = pkgs.fetchurl {
       url = "https://cef-builds.spotifycdn.com/cef_binary_145.0.28+g51162e8+chromium-145.0.7632.160_linux64_minimal.tar.bz2";
-      hash = "sha256-Blx/dEL08pF6lcP96AUsuH4eL3zpYoZMgyWxLlLs0fQ=";
+      hash = "sha256-Blx/dEL08pF6lcP96AUsuH4eL3zpYoZMgyWxLlLsOfQ=";
     };
 
     cefBinary = pkgs.stdenv.mkDerivation {
