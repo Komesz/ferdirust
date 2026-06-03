@@ -18,17 +18,40 @@
       hash = "sha256-Blx/dEL08pF6lcP96AUsuH4eL3zpYoZMgyWxLlLsOfQ=";
     };
 
+    # Lay out the prebuilt CEF in the exact dir + sentinel-file structure that
+    # cef-dll-sys's build.rs (https://github.com/tauri-apps/cef-rs/blob/dev/sys/build.rs)
+    # expects via `CEF_PATH`. The build script then skips its own download.
+    #
+    # Required layout:
+    #   $CEF_PATH/<cef_version>/<os_arch>/        ← extracted tarball contents
+    #   $CEF_PATH/<cef_version>/<os_arch>/archive.json
+    #
+    # `<cef_version>` here = "145.0.28" (the build-metadata part of the
+    # cef-dll-sys crate version 145.6.1+145.0.28, per `unwrap_cef_version`).
+    cefVersion = "145.0.28";
+    cefArchiveName = "cef_binary_145.0.28+g51162e8+chromium-145.0.7632.160_linux64_minimal";
+
     cefBinary = pkgs.stdenv.mkDerivation {
       pname = "cef-binary";
-      version = "145.0.28";
+      version = cefVersion;
       src = cefSrc;
       dontConfigure = true;
       dontBuild = true;
       dontStrip = true;
       installPhase = ''
         runHook preInstall
-        mkdir -p $out
-        cp -r . $out/
+        mkdir -p $out/${cefVersion}/linux64
+        # Tarball top-level is a single dir named cefArchiveName/ — strip it.
+        cp -r ${cefArchiveName}/* $out/${cefVersion}/linux64/ 2>/dev/null || \
+          cp -r ./* $out/${cefVersion}/linux64/
+        # Write archive.json sentinel that cef-dll-sys's check_archive_json validates.
+        cat > $out/${cefVersion}/linux64/archive.json <<EOF
+        {
+          "type": "minimal",
+          "name": "${cefArchiveName}",
+          "sha1": "0000000000000000000000000000000000000000"
+        }
+        EOF
         runHook postInstall
       '';
     };
@@ -57,11 +80,10 @@
 
       buildInputs = runtimeLibs;
 
-      # Override cef-dll-sys's network download by providing CEF up front.
-      # If cef-dll-sys insists on downloading anyway, we'll need __noChroot
-      # or a postPatch to short-circuit its build script.
-      DEP_CEF_CEF_DIR = "${cefBinary}";
-      CEF_DIR        = "${cefBinary}";
+      # Pre-fetched CEF — cef-dll-sys (https://github.com/tauri-apps/cef-rs)
+      # reads CEF_PATH and skips its network download when the expected
+      # versioned dir + archive.json sentinel are present (see cefBinary above).
+      CEF_PATH = "${cefBinary}";
 
       # The build.rs sets rustc-link-arg=-Wl,-rpath,$ORIGIN so the binary
       # looks for libcef.so next to itself. We lay everything out under
@@ -72,19 +94,24 @@
         # Move the binary into the bundle dir
         mv $out/bin/ferdirust $out/lib/ferdirust/ferdirust
 
-        # Copy CEF runtime files alongside
-        cp -r ${cefBinary}/Release/. $out/lib/ferdirust/ 2>/dev/null || true
-        cp -r ${cefBinary}/Resources/. $out/lib/ferdirust/ 2>/dev/null || true
-        # Some CEF distributions flatten; fall back to top-level
+        # CEF runtime files: copy from the pre-fetched cefBinary layout
+        # (${cefBinary}/${cefVersion}/linux64/). Release/Resources subdirs
+        # contain the libs + .pak files in standard CEF distributions.
+        cefDir=${cefBinary}/${cefVersion}/linux64
+        cp -r $cefDir/Release/. $out/lib/ferdirust/ 2>/dev/null || true
+        cp -r $cefDir/Resources/. $out/lib/ferdirust/ 2>/dev/null || true
+        # Fall back: copy flattened top-level files for distributions that
+        # don't use Release/Resources subdirs.
         for f in libcef.so libEGL.so libGLESv2.so libvk_swiftshader.so libvulkan.so.1 \
                  v8_context_snapshot.bin icudtl.dat \
-                 chrome_100_percent.pak chrome_200_percent.pak resources.pak; do
-          if [ -f ${cefBinary}/$f ] && [ ! -e $out/lib/ferdirust/$f ]; then
-            cp ${cefBinary}/$f $out/lib/ferdirust/
+                 chrome_100_percent.pak chrome_200_percent.pak resources.pak \
+                 vk_swiftshader_icd.json chrome-sandbox; do
+          if [ -f $cefDir/$f ] && [ ! -e $out/lib/ferdirust/$f ]; then
+            cp $cefDir/$f $out/lib/ferdirust/
           fi
         done
-        if [ -d ${cefBinary}/locales ] && [ ! -d $out/lib/ferdirust/locales ]; then
-          cp -r ${cefBinary}/locales $out/lib/ferdirust/
+        if [ -d $cefDir/locales ] && [ ! -d $out/lib/ferdirust/locales ]; then
+          cp -r $cefDir/locales $out/lib/ferdirust/
         fi
 
         # chrome-sandbox needs setuid in real installs, but Nix store is
