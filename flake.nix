@@ -50,6 +50,14 @@
         else
           cp -r . $out/
         fi
+        # cef-dll-sys emits `-L$CEF_PATH -lcef`, so libcef.so must be at $out
+        # top level. The minimal tarball ships it in Release/ — link up.
+        if [ -d $out/Release ]; then
+          for f in $out/Release/*; do
+            name=$(basename "$f")
+            [ -e "$out/$name" ] || ln -s "Release/$name" "$out/$name"
+          done
+        fi
         # Sentinel file cef-dll-sys's check_archive_json validates.
         cat > $out/archive.json <<EOF
         {
