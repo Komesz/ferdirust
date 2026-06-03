@@ -14,8 +14,8 @@
     #   2. ls target/release/build/cef-dll-sys-*/out/  → note the tarball name
     #   3. update url + hash here
     cefSrc = pkgs.fetchurl {
-      url = "https://cef-builds.spotifycdn.com/cef_binary_145.0.28%2Bg51162e8%2Bchromium-145.0.7632.160_linux64_minimal.tar.bz2";
-      hash = pkgs.lib.fakeHash;   # nix build prints real hash; paste here
+      url = "https://cef-builds.spotifycdn.com/cef_binary_145.0.28+g51162e8+chromium-145.0.7632.160_linux64_minimal.tar.bz2";
+      hash = "sha256-Blx/dEL08pF6lcP96AUsuH4eL3zpYoZMgyWxLlLs0fQ=";
     };
 
     cefBinary = pkgs.stdenv.mkDerivation {
