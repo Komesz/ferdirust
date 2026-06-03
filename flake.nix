@@ -71,10 +71,12 @@
     };
 
     runtimeLibs = with pkgs; [
-      gtk3 glib atk cairo pango gdk-pixbuf
+      gtk3 glib atk at-spi2-atk at-spi2-core cairo pango gdk-pixbuf
       nss nspr dbus expat libdrm libgbm mesa
       alsa-lib libpulseaudio fontconfig freetype
       libxkbcommon vulkan-loader libGL
+      cups
+      systemd        # provides libudev
       xorg.libX11 xorg.libXcomposite xorg.libXcursor xorg.libXdamage
       xorg.libXext xorg.libXfixes xorg.libXi xorg.libXrandr xorg.libXrender
       xorg.libXScrnSaver xorg.libXtst xorg.libxcb xorg.libxkbfile
@@ -99,9 +101,31 @@
       # archive.json sentinel is at the top level (see cefBinary above).
       CEF_PATH = "${cefBinary}";
 
-      # libcef.so transitively references glib/gio/gobject symbols. cef-dll-sys
-      # only emits `-lcef`, so we add the rest via NIX_LDFLAGS.
-      NIX_LDFLAGS = "-lglib-2.0 -lgio-2.0 -lgobject-2.0";
+      # libcef.so transitively references many system libs. cef-dll-sys only
+      # emits `-lcef`, so list the rest here. Add to this list when a new
+      # `undefined reference to` error appears for a known lib symbol.
+      NIX_LDFLAGS = builtins.concatStringsSep " " [
+        "-lglib-2.0" "-lgio-2.0" "-lgobject-2.0"
+        "-lgtk-3" "-lgdk-3"
+        "-lpango-1.0" "-lpangocairo-1.0"
+        "-lcairo"
+        "-lgdk_pixbuf-2.0"
+        "-latk-1.0" "-latk-bridge-2.0" "-latspi"
+        "-lnss3" "-lnssutil3" "-lsmime3" "-lssl3"
+        "-lnspr4" "-lplc4" "-lplds4"
+        "-lexpat"
+        "-lfontconfig" "-lfreetype"
+        "-lxkbcommon"
+        "-lvulkan"
+        "-lpulse"
+        "-lasound"
+        "-ldbus-1"
+        "-lcups"
+        "-lgbm" "-ldrm"
+        "-ludev"
+        "-lX11" "-lXcomposite" "-lXcursor" "-lXdamage" "-lXext"
+        "-lXfixes" "-lXi" "-lXrandr" "-lXrender" "-lXss" "-lXtst" "-lxcb"
+      ];
 
       # The build.rs sets rustc-link-arg=-Wl,-rpath,$ORIGIN so the binary
       # looks for libcef.so next to itself. We lay everything out under
