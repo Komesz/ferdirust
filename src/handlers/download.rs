@@ -8,6 +8,15 @@ wrap_download_handler! {
     }
 
     impl DownloadHandler {
+        fn can_download(
+            &self,
+            _browser: Option<&mut Browser>,
+            _url: Option<&CefString>,
+            _request_method: Option<&CefString>,
+        ) -> ::std::os::raw::c_int {
+            1
+        }
+
         fn on_before_download(
             &self,
             _browser: Option<&mut Browser>,
@@ -23,6 +32,7 @@ wrap_download_handler! {
                 let path = CefString::from(save_path.to_str().unwrap_or(&filename_str));
                 // show_dialog = 0 means auto-save without dialog
                 cb.cont(Some(&path), 0);
+                return 1;
             }
             0
         }
