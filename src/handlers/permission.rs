@@ -15,6 +15,16 @@ wrap_permission_handler! {
             requested_permissions: u32,
             callback: Option<&mut MediaAccessCallback>,
         ) -> ::std::os::raw::c_int {
+            // Never auto-grant desktop capture: on Wayland the capture source
+            // must come from the xdg-desktop-portal picker. Returning 0 lets
+            // Chrome-style CEF show its share picker, which drives the portal.
+            let desktop_bits =
+                cef::sys::cef_media_access_permission_types_t::CEF_MEDIA_PERMISSION_DESKTOP_AUDIO_CAPTURE as u32
+                | cef::sys::cef_media_access_permission_types_t::CEF_MEDIA_PERMISSION_DESKTOP_VIDEO_CAPTURE as u32;
+            if requested_permissions & desktop_bits != 0 {
+                return 0;
+            }
+
             if self.auto_grant_media {
                 if let Some(url) = requesting_origin {
                     let url_str = url.to_string();
