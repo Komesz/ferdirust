@@ -165,7 +165,7 @@
 
         # Wrapper entry point
         makeWrapper $out/lib/ferdirust/ferdirust $out/bin/ferdirust \
-          --prefix LD_LIBRARY_PATH : "$out/lib/ferdirust"
+          --prefix LD_LIBRARY_PATH : "$out/lib/ferdirust:${pkgs.lib.makeLibraryPath runtimeLibs}"
 
         # .desktop file
         cat > $out/share/applications/ferdirust.desktop <<EOF
