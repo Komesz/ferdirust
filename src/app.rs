@@ -30,6 +30,15 @@ wrap_app! {
                 // Enable WebRTC / media stream
                 cmd.append_switch(Some(&CefString::from("enable-media-stream")));
 
+                // System-audio loopback for screenshare goes through PulseAudio and
+                // segfaults the audio service against pipewire-pulse (crash in
+                // media::PulseLoopbackAudioStream). Disable it; screen video still
+                // works via the PipeWire portal capturer.
+                cmd.append_switch_with_value(
+                    Some(&CefString::from("disable-features")),
+                    Some(&CefString::from("PulseaudioLoopbackForScreenShare")),
+                );
+
                 // GPU acceleration
                 cmd.append_switch(Some(&CefString::from("enable-gpu")));
 
