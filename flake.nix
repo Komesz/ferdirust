@@ -73,7 +73,7 @@
     runtimeLibs = with pkgs; [
       gtk3 glib atk at-spi2-atk at-spi2-core cairo pango gdk-pixbuf
       nss nspr dbus expat libdrm libgbm mesa
-      alsa-lib libpulseaudio fontconfig freetype
+      alsa-lib libpulseaudio pipewire fontconfig freetype
       libxkbcommon vulkan-loader libGL
       cups
       systemd        # provides libudev
