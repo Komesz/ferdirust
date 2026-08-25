@@ -100,14 +100,6 @@ impl AppConfig {
         }
     }
 
-    pub fn cache_dir_for(service_id: &str) -> PathBuf {
-        dirs::data_dir()
-            .unwrap_or_else(|| PathBuf::from("~/.local/share"))
-            .join("ferdirust")
-            .join("cef_cache")
-            .join(service_id)
-    }
-
     pub fn enabled_services(&self) -> Vec<&ServiceConfig> {
         self.services.iter().filter(|s| s.enabled).collect()
     }

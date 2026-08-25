@@ -12,7 +12,7 @@ wrap_request_handler! {
     impl RequestHandler {
         fn on_before_browse(
             &self,
-            _browser: Option<&mut Browser>,
+            browser: Option<&mut Browser>,
             frame: Option<&mut Frame>,
             request: Option<&mut Request>,
             _user_gesture: ::std::os::raw::c_int,
@@ -50,11 +50,16 @@ wrap_request_handler! {
                     "[request] Intercepting main-frame navigation to external allowed origin: {}",
                     url_str
                 );
-                // Open in popup window instead of navigating the main frame
+                // Open in popup window instead of navigating the main frame,
+                // inside the same storage partition as the service
+                let request_context = browser
+                    .and_then(|b| b.host())
+                    .and_then(|h| h.request_context());
                 create_popup_for_url(
                     &url_str,
                     self.allowed_origins.clone(),
                     self.auto_grant_media,
+                    request_context,
                 );
                 return 1; // Cancel the main-frame navigation
             }

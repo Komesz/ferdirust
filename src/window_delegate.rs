@@ -86,6 +86,7 @@ wrap_window_delegate! {
                 }
 
                 let ctrl = event.modifiers & (1 << 2) != 0; // EVENTFLAG_CONTROL_DOWN
+                let shift = event.modifiers & (1 << 1) != 0; // EVENTFLAG_SHIFT_DOWN
 
                 if ctrl {
                     // Ctrl+1 through Ctrl+9 to switch services
@@ -103,11 +104,16 @@ wrap_window_delegate! {
                         }
                     }
 
-                    // Ctrl+R to reload
+                    // Ctrl+R to reload, Ctrl+Shift+R to hard reload
+                    // (bypasses the HTTP cache and the service worker)
                     if event.windows_key_code == 0x52 {
                         if let Ok(guard) = self.service_manager.lock() {
                             if let Some(mgr) = guard.as_ref() {
-                                mgr.reload_active();
+                                if shift {
+                                    mgr.hard_reload_active();
+                                } else {
+                                    mgr.reload_active();
+                                }
                             }
                         }
                         return 1;

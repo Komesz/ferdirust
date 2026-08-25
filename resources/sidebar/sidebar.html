@@ -19,6 +19,8 @@ body {
   user-select: none;
 }
 .service-icon {
+  text-decoration: none;
+  -webkit-user-drag: none;
   width: 40px;
   height: 40px;
   border-radius: 12px;
@@ -94,11 +96,16 @@ function initServices(serviceList) {
   const container = document.getElementById('services');
   container.innerHTML = '';
   serviceList.forEach((svc, i) => {
-    const div = document.createElement('div');
+    // Anchor with a custom-scheme href: native code identifies the icon
+    // under a right-click via the context menu params' link URL.
+    const div = document.createElement('a');
     div.className = 'service-icon' + (i === 0 ? ' active' : '');
     div.id = 'svc-' + svc.id;
     div.title = svc.name;
-    div.onclick = () => switchService(svc.id);
+    div.href = 'ferdisvc:' + svc.id;
+    div.draggable = false;
+    div.onclick = (e) => { e.preventDefault(); switchService(svc.id); };
+    div.addEventListener('auxclick', (e) => e.preventDefault());
 
     // Try loading favicon, fall back to letter
     const letter = document.createElement('span');

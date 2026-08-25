@@ -26,6 +26,11 @@ fn main() {
     }
 
     // Browser process continues here
+
+    // Delete service partitions flagged by "Reset" — must happen before CEF
+    // opens any profile files.
+    service::partition::sweep_marked_partitions();
+
     let mut settings = Settings::default();
     settings.no_sandbox = 1;
     settings.root_cache_path = CefString::from(
